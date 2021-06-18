@@ -11,8 +11,8 @@ _A logical, reasonably standardized, but flexible project structure for doing an
 ### To start a new project, run:
 ------------
 
-    cookiecutter https://github.com/tdeboissiere/cookiecutter-deeplearning.git
+    cookiecutter https://github.com/yh80ywol/cookiecutter-deeplearning-FORK.git
 
 ### Credits:
 
-Largely inspired by https://github.com/drivendata/cookiecutter-data-science
+Largely inspired by https://github.com/drivendata/cookiecutter-data-science und https://github.com/tdeboissiere/cookiecutter-deeplearning.git 
