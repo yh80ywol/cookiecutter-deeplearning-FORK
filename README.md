@@ -15,4 +15,4 @@ _A logical, reasonably standardized, but flexible project structure for doing an
 
 ### Credits:
 
-Largely inspired by https://github.com/drivendata/cookiecutter-data-science und https://github.com/tdeboissiere/cookiecutter-deeplearning.git 
+Largely inspired by https://github.com/drivendata/cookiecutter-data-science and https://github.com/tdeboissiere/cookiecutter-deeplearning.git 
