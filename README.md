@@ -1,14 +1,14 @@
-# Cookiecutter Deep Learning
+# Cookiecutter Deep Learning Fork
 
-_A logical, reasonably standardized, but flexible project structure for doing and sharing deep learning work with python._
+_A logical, reasonably standardized, but flexible project structure for doing and sharing deep learning work with python (forked)._
 
-### Requirements to use the cookiecutter template:
+### Requirements:
 -----------
  - Python 2 or 3
- - [cookiecutter Python package](http://cookiecutter.readthedocs.org/en/latest/installation.html) >= 1.4.0: `pip install cookiecutter`
+ - [cookiecutter Python package](http://cookiecutter.readthedocs.org/en/latest/installation.html) >= 1.4.0: `pip install cookiecutter` or `conda install cookiecutter`
 
 
-### To start a new project, run:
+### To get access to the template, run:
 ------------
 
     cookiecutter https://github.com/yh80ywol/cookiecutter-deeplearning-FORK.git
