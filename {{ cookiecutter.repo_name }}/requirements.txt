@@ -12,3 +12,4 @@ matplotlib
 colorama
 tqdm
 terminaltables
+UPDATEN!
