@@ -27,7 +27,7 @@ Project Organization
     │
     ├── reports                                 <- Generated analysis as HTML, PDF, LaTeX, etc.
     │
-    ├── services                                <- 
+    ├── services                                <- Packaged Version
     │
     ├── src                                     <- Source code for use in this project.
     │   │
@@ -45,6 +45,6 @@ Project Organization
     ├── requirements.txt                        <- The requirements file for reproducing the analysis environment, e.g.
     │                                              generated with `pip freeze > requirements.txt`
     │
-    ├── environment.yml                         <- The requirements file for reproducing the analysis environment   │
+    ├── environment.yml                         <- The requirements file for reproducing the analysis environment   
     │
     ├── main.py                                 <- Script for main File
