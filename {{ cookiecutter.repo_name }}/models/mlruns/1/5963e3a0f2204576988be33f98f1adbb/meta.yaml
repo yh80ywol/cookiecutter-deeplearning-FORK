@@ -1,0 +1,15 @@
+artifact_uri: models/mlruns/1/5963e3a0f2204576988be33f98f1adbb/artifacts
+end_time: 1646481657509
+entry_point_name: ''
+experiment_id: '1'
+lifecycle_stage: active
+name: ''
+run_id: 5963e3a0f2204576988be33f98f1adbb
+run_uuid: 5963e3a0f2204576988be33f98f1adbb
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1646481621997
+status: 3
+tags: []
+user_id: Tom

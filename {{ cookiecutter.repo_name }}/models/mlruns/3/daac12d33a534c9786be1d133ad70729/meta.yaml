@@ -1,0 +1,15 @@
+artifact_uri: models/mlruns/3/daac12d33a534c9786be1d133ad70729/artifacts
+end_time: 1647222923135
+entry_point_name: ''
+experiment_id: '3'
+lifecycle_stage: active
+name: ''
+run_id: daac12d33a534c9786be1d133ad70729
+run_uuid: daac12d33a534c9786be1d133ad70729
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1647222659585
+status: 3
+tags: []
+user_id: root

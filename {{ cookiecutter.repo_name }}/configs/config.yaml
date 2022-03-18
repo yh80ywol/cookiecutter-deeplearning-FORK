@@ -1,0 +1,243 @@
+---
+#Hydra Configuration
+#Attention(!)
+#working directory see below (in current hydra version NOT separable, so curr_dir = work_dir = output_dir)
+#can be changed in later with vers 1.2 (curr_dir = work dir and outputdir = ./output/date)
+# -> PR here : https://github.com/facebookresearch/hydra/pull/1867/commits/bef603fbbdd0e976e4df4b01a38843c8edd0d6ae
+hydra:
+  run:
+    dir: . #working and output dir (single run)
+  sweep:
+    dir: . #working and output dir (multi run)
+    subdir: .
+defaults:   
+  - override hydra/job_logging: disabled #enabled/disabled (output a log file)
+
+#Prefect Configuration
+prefect:
+  project_name: DL-Pipeline
+
+#Dataloader Pipeline
+dataloader:
+  RestEndpoint: http://131.188.113.42:8050/factsfortime
+  startdate: 2021-08-10 #date YYYY-MM-DD
+  enddate: 2999-01-01 #date YYYY-MM-DD
+  process_name: "" #string
+  operator_first_name: "" #string 
+  operator_family_name: "" #string
+  material_type: "" #string
+
+  path_ID: data/raw/facts/ #path of saving facts.json
+  path_measurements: data/raw/timeseries/ #path of saving measurements.json 
+  path_img: data/raw/images/ #path of saving images
+
+  filetype_ID: json
+  filetype_measurements: json  
+  filetype_img: json #(base64 converted)
+  filetype_img_converted: jpeg
+
+  filename_ID: facts
+  filename_measurements: measurements
+  filename_img: images
+
+#TimeSeries Pipeline
+preprocess_timeseries:
+  file_path: data/processed/timeseries/
+  file_name: Einpressen_Gesamt_4_Klassen.xlsx
+  file_sheet: Kraft
+  file_columns: [CurveId, CycleId, ProgramName, CycleDate, Unterkategorie, Kategorienummer, StepNo, SignalYName, IsY2, CurveType, Points]
+  file_columns_method: exclude #include or exclude of "file_colums" above
+
+  label: Kategorie #this column (NO LIST) include the labels/targets
+  label_encoding: onehot #label encoding (onehot or labelencoding or none) -> if you use onehot look at metrics and loss(!)
+  feature_encoding: standardization #features encoding (normalization or standardization or none)
+  
+
+  batch_size: 32
+  shuffle: True
+  split: [0.6, 0.2, 0.2] #train/val/test
+
+model_timeseries:
+  #avaiable model pool: Oberhof4, Oberhof5, LeNet from -> https://www.mdpi.com/1424-8220/20/6/1693, ResNet from -> https://github.com/hfawaz/dl-4-tsc
+  model: oberhof4
+
+  num_classes: 4
+  epochs: 300
+  learning_rate: 0.001
+
+  optimizer: adam #sgd, adam or rmsprop -> see keras.io/api/optimizers/
+  metrics: categorical_accuracy #-> see keras.io/api/metrics/ (DONT use sparse_... if onehot encoding(!))
+  loss: categorical_crossentropy #-> see keras.io/api/losses/ (DONT use sparse_... if onehot encoding(!), classes>2 sparse_categorical_crossentropy, classes=2 binary_crossentropy)
+  
+  mlflow: 
+    experiment_name: Experiment_TimeSeries 
+    tracking_uri: models/mlruns  #path of storing mlflow files
+    log_models: True #True/False for logging models in Keras Format(set False if using callback model_checkpoint)
+
+  callbacks:
+    #for default settings see BaseClass.py or avanwyk.com/tensorflow-2-super-convergence-with-the-1cycle-policy/ or arxiv.org/abs/1708.07120
+    super_convergence: 
+      usage: False #turn off/on (True/False)
+
+    #for explanation settings see keras.io/api/callbacks/early_stopping/
+    early_stopping: 
+      usage: False #turn off/on (True/False)
+      monitor: val_loss
+      min_delta: 0
+      patience: 100
+      verbose: 1
+      mode: auto
+      baseline: 
+      restore_best_weights: False
+
+    #for explanation settings see keras.io/api/callbacks/model_checkpoint/
+    model_checkpoint: 
+      usage: False #turn off/on (True/False)
+      filepath: models/my_best_model_timeseries #filepath (then saved as tf model), otherwise "best_model.hdf5" (then saved as keras model)
+      monitor: val_loss
+      verbose: 1
+      save_best_only: True
+      save_weights_only: False
+      mode: auto
+      save_freq: epoch
+
+#StructuredData Pipeline
+preprocess_structureddata:
+  file_path: data/raw/structureddata/
+  file_name: Einpressen_Gesamt_Test.xlsx
+  file_sheet: Kraft
+  file_columns: [Kategorie, 200, age, size, animal, pet]
+  file_columns_method: include #include or exclude of "file_colums" above
+
+  #every column in file_columns HAS to be assigned now, if it should affect model:
+  label: Kategorie #this column (NO LIST) include the labels/targets
+  numeric_columns: [200] #transformed to normalized floats (mean = 0, std = 1)
+  int_to_onehot_columns: [age] #transformed from integer to onehot
+  str_to_onehot_columns: [size] #transformed from string to onehot
+  str_to_int_columns: [animal,pet] #transformend from string to integer
+
+  batch_size: 5
+  shuffle: True
+  split: [0.7, 0.15, 0.15] #train/val/test
+
+model_structureddata:
+  #avaiable model pool: MLP
+  model: MLP
+
+  num_classes: 2
+  epochs: 50
+  learning_rate: 0.01
+
+  optimizer: adam ##sgd, adam or rmsprop -> see keras.io/api/optimizers/
+  metrics: accuracy #-> see keras.io/api/metrics/ (DONT use sparse_... if onehot encoding(!))
+  loss: binary_crossentropy #-> see keras.io/api/losses/ (DONT use sparse_... if onehot encoding(!), classes>2 sparse_categorical_crossentropy, classes=2 binary_crossentropy)
+    
+  mlflow: 
+    experiment_name: Experiment_StructuredData 
+    tracking_uri: models/mlruns  #path of storing mlflow files
+    log_models: True #True/False for logging models in Keras Format(set False if using callback model_checkpoint)
+  
+  callbacks:
+    #for default settings see BaseClass.py or avanwyk.com/tensorflow-2-super-convergence-with-the-1cycle-policy/ or arxiv.org/abs/1708.07120
+    super_convergence: 
+      usage: True #turn off/on (True/False)
+
+    #for explanation settings see keras.io/api/callbacks/early_stopping/
+    early_stopping: 
+      usage: False #turn off/on (True/False)
+      monitor: val_loss
+      min_delta: 0
+      patience: 3
+      verbose: 1
+      mode: auto
+      baseline: 
+      restore_best_weights: False
+
+    #for explanation settings see keras.io/api/callbacks/model_checkpoint/
+    model_checkpoint: 
+      usage: False #turn off/on (True/False)
+      filepath: models/my_best_model_strucdata #filepath (then saved as tf model), otherwise "best_model.hdf5" (then saved as keras model)
+      monitor: val_loss
+      verbose: 1
+      save_best_only: True
+      save_weights_only: False
+      mode: auto
+      save_freq: epoch
+
+#Images Pipeline
+preprocess_images:
+  file_path: data/raw/images/PEDS1
+  image_size: [224,224]
+  color_channels: [3] #(1=grayscale, 3=RGB)
+  seed: 1337  
+
+  batch_size: 8
+  split: [0.7, 0.15, 0.15] #train/val/test
+  
+
+  rescaling: #[0,1] or [-1,1] or None
+    - None #[-1,1]
+  random_crop: #pixel height/width
+    - False
+    - [120,120]
+  random_flip: #horizontal and/or vertical ("horizontal_and_vertical")
+    - True
+    - horizontal_and_vertical
+  random_translation: #factor height/width
+    - False 
+    - [0.2,0.2]
+  random_rotation: #angle
+    - True 
+    - 0.3
+  random_zoom: #factor height/width
+    - True 
+    - [0.2,0.2]
+
+model_images:
+  #avaiable model pool: scratch (LeNet Basemodel), MobileNet, Xception, InceptionV3, ResNet50, ResNet152V2, see -> https://keras.io/api/applications/
+  model: resnet50
+  weights: imagenet #imagenet/none (use pretrained weights in model)
+  train_all_params: yes #yes/no (if yes -> retrain ALL params (top layer AND pretrained weights), if no -> just train top layer)
+
+
+  num_classes: 4
+  epochs: 40
+  learning_rate: 0.05
+
+  optimizer: sgd #sgd, adam or rmsprop -> see keras.io/api/optimizers/
+  metrics: accuracy #-> see keras.io/api/metrics/
+  loss: sparse_categorical_crossentropy #-> see keras.io/api/losses/ (classes>2 sparse_categorical_crossentropy, classes=2 binary_crossentropy)
+
+  mlflow: 
+    experiment_name: Experiment_Images
+    tracking_uri: models/mlruns  #path of storing mlflow files
+    log_models: True #True/False for logging models in Keras Format(set False if using callback model_checkpoint)
+
+  callbacks:
+    #for default settings see BaseClass.py or avanwyk.com/tensorflow-2-super-convergence-with-the-1cycle-policy/ or arxiv.org/abs/1708.07120
+    super_convergence: 
+      usage: True #turn off/on (True/False)
+
+    #for explanation settings see keras.io/api/callbacks/early_stopping/
+    early_stopping: 
+      usage: True #turn off/on (True/False)
+      monitor: val_loss
+      min_delta: 0
+      patience: 15
+      verbose: 1
+      mode: auto
+      baseline: 
+      restore_best_weights: True
+
+    #for explanation settings see keras.io/api/callbacks/model_checkpoint/
+    model_checkpoint: 
+      usage: False #turn off/on (True/False)
+      filepath: models/my_best_model_images #filepath (then saved as tf model), otherwise "best_model.hdf5" (then saved as keras model)
+      monitor: val_loss
+      verbose: 1
+      save_best_only: True
+      save_weights_only: False
+      mode: auto
+      save_freq: epoch
+
+

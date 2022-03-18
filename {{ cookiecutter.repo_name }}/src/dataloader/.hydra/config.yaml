@@ -1,0 +1,208 @@
+prefect:
+  project_name: DL-Pipeline
+dataloader:
+  RestEndpoint: http://131.188.113.42:8050/factsfortime
+  startdate: '2021-08-10'
+  enddate: '2999-01-01'
+  process_name: ''
+  operator_first_name: ''
+  operator_family_name: ''
+  material_type: ''
+  path_ID: data/raw/facts/
+  path_measurements: data/raw/timeseries/
+  path_img: data/raw/images/
+  filetype_ID: json
+  filetype_measurements: json
+  filetype_img: json
+  filetype_img_converted: jpeg
+  filename_ID: facts
+  filename_measurements: measurements
+  filename_img: images
+preprocess_timeseries:
+  file_path: data/processed/timeseries/
+  file_name: Einpressen_Gesamt_4_Klassen.xlsx
+  file_sheet: Kraft
+  file_columns:
+  - CurveId
+  - CycleId
+  - ProgramName
+  - CycleDate
+  - Unterkategorie
+  - Kategorienummer
+  - StepNo
+  - SignalYName
+  - IsY2
+  - CurveType
+  - Points
+  file_columns_method: exclude
+  label: Kategorie
+  label_encoding: onehot
+  feature_encoding: standardization
+  batch_size: 32
+  shuffle: true
+  split:
+  - 0.6
+  - 0.2
+  - 0.2
+model_timeseries:
+  model: oberhof4
+  num_classes: 4
+  epochs: 1
+  learning_rate: 0.001
+  optimizer: adam
+  metrics: categorical_accuracy
+  loss: categorical_crossentropy
+  mlflow:
+    experiment_name: Experiment_TimeSeries
+    tracking_uri: models/mlruns
+    log_models: true
+  callbacks:
+    super_convergence:
+      usage: false
+    early_stopping:
+      usage: false
+      monitor: val_loss
+      min_delta: 0
+      patience: 100
+      verbose: 1
+      mode: auto
+      baseline: null
+      restore_best_weights: false
+    model_checkpoint:
+      usage: false
+      filepath: models/my_best_model_timeseries
+      monitor: val_loss
+      verbose: 1
+      save_best_only: true
+      save_weights_only: false
+      mode: auto
+      save_freq: epoch
+preprocess_structureddata:
+  file_path: data/raw/structureddata/
+  file_name: Einpressen_Gesamt_Test.xlsx
+  file_sheet: Kraft
+  file_columns:
+  - Kategorie
+  - 200
+  - age
+  - size
+  - animal
+  - pet
+  file_columns_method: include
+  label: Kategorie
+  numeric_columns:
+  - 200
+  int_to_onehot_columns:
+  - age
+  str_to_onehot_columns:
+  - size
+  str_to_int_columns:
+  - animal
+  - pet
+  batch_size: 5
+  shuffle: true
+  split:
+  - 0.7
+  - 0.15
+  - 0.15
+model_structureddata:
+  model: MLP
+  num_classes: 2
+  epochs: 1
+  learning_rate: 0.01
+  optimizer: adam
+  metrics: accuracy
+  loss: binary_crossentropy
+  mlflow:
+    experiment_name: Experiment_StructuredData
+    tracking_uri: models/mlruns
+    log_models: true
+  callbacks:
+    super_convergence:
+      usage: true
+    early_stopping:
+      usage: false
+      monitor: val_loss
+      min_delta: 0
+      patience: 3
+      verbose: 1
+      mode: auto
+      baseline: null
+      restore_best_weights: false
+    model_checkpoint:
+      usage: false
+      filepath: models/my_best_model_strucdata
+      monitor: val_loss
+      verbose: 1
+      save_best_only: true
+      save_weights_only: false
+      mode: auto
+      save_freq: epoch
+preprocess_images:
+  file_path: data/raw/images/PEDS1
+  image_size:
+  - 224
+  - 224
+  color_channels:
+  - 3
+  seed: 1337
+  batch_size: 8
+  split:
+  - 0.7
+  - 0.15
+  - 0.15
+  rescaling:
+  - None
+  random_crop:
+  - false
+  - - 120
+    - 120
+  random_flip:
+  - true
+  - horizontal_and_vertical
+  random_translation:
+  - false
+  - - 0.2
+    - 0.2
+  random_rotation:
+  - true
+  - 0.3
+  random_zoom:
+  - true
+  - - 0.2
+    - 0.2
+model_images:
+  model: resnet50
+  weights: imagenet
+  train_all_params: true
+  num_classes: 4
+  epochs: 1
+  learning_rate: 0.05
+  optimizer: sgd
+  metrics: accuracy
+  loss: sparse_categorical_crossentropy
+  mlflow:
+    experiment_name: Experiment_Images
+    tracking_uri: models/mlruns
+    log_models: true
+  callbacks:
+    super_convergence:
+      usage: true
+    early_stopping:
+      usage: true
+      monitor: val_loss
+      min_delta: 0
+      patience: 15
+      verbose: 1
+      mode: auto
+      baseline: null
+      restore_best_weights: true
+    model_checkpoint:
+      usage: false
+      filepath: models/my_best_model_images
+      monitor: val_loss
+      verbose: 1
+      save_best_only: true
+      save_weights_only: false
+      mode: auto
+      save_freq: epoch
