@@ -11,7 +11,7 @@ _Ein logisches, standardisiertes, flexibles Projekt Template. Dadurch wird eine 
 ### Zum Download des Templates, run:
 ------------
 
-    cookiecutter https://github.com/yh80ywol/cookiecutter-deeplearning-FORK.git
+    cookiecutter https://github.com/Timtam94/MA_Auer.git
 
 ### Credits:
 
